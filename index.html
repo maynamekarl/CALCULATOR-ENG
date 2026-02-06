@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Joule Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="app">
+  <section class="card">
+    <header class="card-header">
+      <h1>Joule Calculator</h1>
+      <p class="subtitle">Impact energy calculation from crater geometry</p>
+    </header>
+
+    <div class="card-body">
+
+      <div class="layout">
+        <!-- left main column -->
+        <div class="main-col">
+
+          <div id="output" class="output" role="status" aria-live="polite">
+            <div class="value">0</div>
+            <div class="unit">J</div>
+          </div>
+
+          <fieldset class="controls">
+            <legend>Contact diameter</legend>
+
+            <div class="group">
+              <div class="group-title">Impact part</div>
+              <div class="button-row">
+                <button type="button" class="chip" data-group="impact" data-label="Low" data-value="8.83"
+                        onclick="setContact(this.dataset.value, this)">Low
+                </button>
+                <button type="button" class="chip" data-group="impact" data-label="Medium" data-value="9.75"
+                        onclick="setContact(this.dataset.value, this)">Medium
+                </button>
+                <button type="button" class="chip" data-group="impact" data-label="High" data-value="10.67"
+                        onclick="setContact(this.dataset.value, this)">High
+                </button>
+                <button type="button" class="chip" data-group="impact" data-label="Giant" data-value="11.67"
+                        onclick="setContact(this.dataset.value, this)">Giant
+                </button>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="group-title">Target part</div>
+              <div class="button-row">
+                <button type="button" class="chip" data-group="target" data-label="Low" data-value="14.29"
+                        onclick="setContact(this.dataset.value, this)">Low
+                </button>
+                <button type="button" class="chip" data-group="target" data-label="Medium" data-value="17.29"
+                        onclick="setContact(this.dataset.value, this)">Medium
+                </button>
+                <button type="button" class="chip" data-group="target" data-label="High" data-value="19.14"
+                        onclick="setContact(this.dataset.value, this)">High
+                </button>
+                <button type="button" class="chip" data-group="target" data-label="Giant" data-value="20.86"
+                        onclick="setContact(this.dataset.value, this)">Giant
+                </button>
+              </div>
+            </div>
+
+            <div class="info">
+              Selected contact: <span id="contactDisplay">—</span>
+            </div>
+          </fieldset>
+
+          <fieldset class="controls">
+            <legend>Material</legend>
+            <select id="material" class="select">
+              <option value="wood">Wood</option>
+              <option value="concrete">Concrete</option>
+              <option value="reinforced_concrete">Reinforced concrete</option>
+              <option value="asphalt">Asphalt</option>
+              <option value="brick">Brick wall</option>
+              <option value="steel">Steel</option>
+              <option value="iron">Cast iron / Iron</option>
+              <option value="titanium">Titanium</option>
+              <option value="ceramic">Ceramics (tile)</option>
+              <option value="rock">Rock</option>
+              <option value="soil">Soil</option>
+            </select>
+          </fieldset>
+
+          <fieldset class="controls grid">
+            <legend>Crater geometry</legend>
+
+            <div class="geometry-toggle" role="tablist" aria-label="Geometry input mode">
+              <button type="button" id="geometryDiameterBtn" class="btn-toggle active" aria-pressed="true">Diameter</button>
+              <button type="button" id="geometryWHBtn" class="btn-toggle" aria-pressed="false">Width × Height</button>
+            </div>
+
+            <!-- Diameter (visible by default) -->
+            <input type="number" id="craterDiameter" class="input" placeholder="Crater diameter (cm)" min="0" step="any">
+
+            <!-- Width and height (hidden by default) -->
+            <input type="number" id="craterWidth" class="input hidden" placeholder="Crater width (cm)" min="0" step="any">
+            <input type="number" id="craterHeight" class="input hidden" placeholder="Height (length) of crater (cm)" min="0" step="any">
+          </fieldset>
+
+          <fieldset class="controls">
+            <legend>Depth / Thickness (cm)</legend>
+            <input type="number" id="depth" class="input" placeholder="Depth / Thickness (cm)" min="0" step="any">
+          </fieldset>
+
+          <fieldset class="controls">
+            <legend>Impact type</legend>
+            <select id="impactType" class="select">
+              <option value="normal">Normal crater</option>
+              <option value="clean">Clean crater / Through</option>
+            </select>
+          </fieldset>
+
+          <div class="actions">
+            <button class="btn primary" onclick="calculate()">Calculate</button>
+            <button class="btn" onclick="resetSelection()">Reset</button>
+
+            <div class="format-group">
+              <button id="formatToggle" class="btn" onclick="toggleDisplayFormat()">Format: Auto</button>
+              <div class="format-hint">Auto — selects J/kJ/MJ automatically. Full — shows full joules.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- right column: hint card -->
+        <aside class="sidebar">
+          <div class="hint-card">
+            <h3>Height ranges</h3>
+            <ul class="ranges">
+              <li><span class="badge">Low</span><span class="range">130 — 160 cm</span></li>
+              <li><span class="badge">Medium</span><span class="range">160 — 180 cm</span></li>
+              <li><span class="badge">High</span><span class="range">180 — 200 cm</span></li>
+              <li><span class="badge">Giant</span><span class="range">200 — 250 cm</span></li>
+            </ul>
+            <p class="hint-note">Tip: these ranges help pick a contact diameter depending on the character height.</p>
+
+            <hr style="border:none; border-top:1px solid rgba(15,23,42,0.1); margin:10px 0;">
+            <h4 style="margin:8px 0 6px; font-size:14px;">Crater types</h4>
+            <p style="font-size:13px; color:var(--muted); margin:6px 0 0;">
+              <strong>Normal crater</strong> — concave crater: the impact creates a depression where depth tapers toward the rim.
+            </p>
+            <p style="font-size:13px; color:var(--muted); margin:6px 0 0;">
+              <strong>Clean crater / Through</strong> — removal across the full area (e.g., a pierced wall). The destruction diameter is constant through the thickness.
+            </p>
+
+            <hr style="border:none; border-top:1px solid rgba(15,23,42,0.06); margin:10px 0;">
+            <h4 style="margin:8px 0 6px; font-size:14px;">What are impact / target parts</h4>
+            <p style="font-size:13px; color:var(--muted); margin:6px 0 0;">
+              <strong>Impact part</strong> — the body part delivering the strike: fist, elbow, knee, head, etc.
+            </p>
+            <p style="font-size:13px; color:var(--muted); margin:6px 0 0;">
+              <strong>Target part</strong> — the body part or surface that is impacted: head, back, torso, chest, hips, etc.
+            </p>
+
+          </div>
+        </aside>
+      </div>
+
+    </div>
+
+    <footer class="card-footer">
+      <small>Select one of the 8 contact options — the selected button will be highlighted.</small>
+    </footer>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
